@@ -206,8 +206,8 @@ class Config:
             "action": {"on": False},
             "state": {"any_on": False, "all_on": False},
         }
-        #await self.async_set_storage_value("groups", next_group_id, group_config)
-        await self.async_set_storage_value("groups", 8, group_config)
+        await self.async_set_storage_value("groups", next_group_id, group_config)
+        
         return next_group_id
 
     async def async_get_group_config(self, group_id: str) -> dict:
