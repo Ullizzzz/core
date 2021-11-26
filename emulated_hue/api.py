@@ -975,6 +975,8 @@ class HueApi:
 
         # local scenes first
         scenes = await self.config.async_get_storage_value("scenes", default={})
+        LOGGER.info("local scenes")
+        LOGGER.info(scenes)
         #result = copy.deepcopy(scenes)
         for scene_id, scene_conf in scenes.items():
             # no entity_id = not hass scene, use original code
@@ -989,6 +991,8 @@ class HueApi:
             if entity["disabled_by"]:
                 # do not include disabled scenes
                 continue
+            LOGGER.info("Hassio scenes")
+            LOGGER.info(entity)
             entity_id = entity["entity_id"]
             scene_id = await self.config.async_entity_id_to_scene_id(entity_id)
             # The scene may have only just been created by above method
@@ -1041,7 +1045,7 @@ class HueApi:
             group_id = await self.config.async_area_id_to_group_id(area_id)
             LOGGER.info(group_id)
             group_conf = await self.config.async_get_group_config(group_id)
-            LOGGER.info(group_conf)
+            #LOGGER.info(group_conf)
             if not group_conf["enabled"]:
                 continue
             result[group_id] = group_conf.copy()
