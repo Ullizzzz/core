@@ -292,14 +292,20 @@ class HueApi:
         # instead of directly getting groups should have a property
         # get groups instead so we can easily modify it
         group_conf = await self.config.async_get_storage_value("groups", group_id)
-        if group_id == "0" and "scene" in request_data:
+        if "scene" in request_data:
             # scene request
             scene = await self.config.async_get_storage_value(
                 "scenes", request_data["scene"], default={}
             )
-            for light_id, light_state in scene["lightstates"].items():
-                entity = await self.config.async_entity_by_light_id(light_id)
-                await self.__async_light_action(entity, light_state)
+            if "entity_id" in scene:
+                # execute service to activate HASS scene
+                LOGGER.debug("Calling HA service scene.turn_on for scene %s", scene["entity_id"])
+                data = {const.HASS_ATTR_ENTITY_ID: scene["entity_id"]}
+                await self.hue.hass.call_service(const.HASS_DOMAIN_SCENE, const.HASS_SERVICE_TURN_ON, data)
+            else:
+                for light_id, light_state in scene["lightstates"].items():
+                    entity = await self.config.async_entity_by_light_id(light_id)
+                    await self.__async_light_action(entity, light_state)
         else:
             # forward request to all group lights
             # may need refactor to make __async_get_group_lights not an
@@ -390,7 +396,13 @@ class HueApi:
         update_dict(light_conf, request_data)
         return send_success_response(request.path, request_data, username)
 
-    @routes.get("/api/{username}/{itemtype:(?:scenes|rules|resourcelinks)}")
+    @routes.get("/api/{username}/scenes")
+    @check_request()
+    async def async_get_scenes(self, request: web.Request):
+        """Handle requests to retrieve the info all scenes."""
+        return send_json_response(await self.__async_get_all_scenes())
+    
+    @routes.get("/api/{username}/{itemtype:(?:rules|resourcelinks)}")
     @check_request()
     async def async_get_localitems(self, request: web.Request):
         """Handle requests to retrieve localitems (e.g. scenes)."""
@@ -406,6 +418,8 @@ class HueApi:
         itemtype = request.match_info["itemtype"]
         items = await self.config.async_get_storage_value(itemtype)
         result = items.get(item_id, {})
+        if itemtype == "scenes":
+            result = await self.__async_scene_to_hue(result)
         return send_json_response(result)
 
     @routes.post("/api/{username}/{itemtype:(?:scenes|rules|resourcelinks)}")
@@ -470,17 +484,6 @@ class HueApi:
                 await self.config.async_set_storage_value("bridge_config", key, value)
         return send_success_response(request.path, request_data, username)
 
-    async def async_scene_to_full_state(self) -> dict:
-        """Return scene data, removing lightstates and adds group lights instead."""
-        scenes = await self.config.async_get_storage_value("scenes", default={})
-        scenes = copy.deepcopy(scenes)
-        for scene_num, scene_data in scenes.items():
-            scenes_group = scene_data["group"]
-            # Remove lightstates only if existing
-            scene_data.pop("lightstates", None)
-            scene_data["lights"] = await self.__async_get_group_id(scenes_group)
-        return scenes
-
     @routes.get("/api/{username}")
     @check_request()
     async def get_full_state(self, request: web.Request):
@@ -491,7 +494,7 @@ class HueApi:
                 "schedules", default={}
             ),
             "rules": await self.config.async_get_storage_value("rules", default={}),
-            "scenes": await self.async_scene_to_full_state(),
+            "scenes": await self.__async_get_all_scenes(),
             "resourcelinks": await self.config.async_get_storage_value(
                 "resourcelinks", default={}
             ),
@@ -720,6 +723,36 @@ class HueApi:
             return True
         return False
 
+    async def __async_scene_to_hue(
+        self, entity: dict, light_config: Optional[dict] = None
+    ) -> dict:
+        """Convert a scene to its Hue bridge JSON representation."""
+        retval = copy.deepcopy(entity)
+        if "entity_id" in retval:
+            # This is a hass scene
+            entity_id = retval["entity_id"]
+            scene_entity = self.hue.hass.entity_registry.get(entity_id)
+            if not scene_entity:
+                raise Exception(f"Entity {entity_id} not found!")
+            scene_state = self.hue.hass.get_state(entity_id, attribute=None)
+            scene_attr = scene_state["attributes"]
+            if "friendly_name" in scene_attr:
+                retval["name"] = scene_attr["friendly_name"]
+            else:
+                retval["name"] = entity_id
+            if "area_id" in scene_entity:
+                area_id = scene_entity["area_id"]
+                group_id = await self.config.async_area_id_to_group_id(area_id)
+            else:
+                group_id = 0
+            retval["group"] = group_id
+        else:
+            # This is a regular scene. Use original code
+            retval.pop("lightstates", None)
+            scenes_group = retval["group"]
+            retval["lights"] = await self.__async_get_group_id(scenes_group)
+        return retval
+
     async def __async_entity_to_hue(
         self,
         entity: dict,
@@ -936,6 +969,35 @@ class HueApi:
             )
         return result
 
+    async def __async_get_all_scenes(self) -> dict:
+        """Create a dict of all scenes"""
+        result = {}
+
+        # local scenes first
+        scenes = await self.config.async_get_storage_value("scenes", default={})
+        #result = copy.deepcopy(scenes)
+        for scene_id, scene_conf in scenes.items():
+            # no entity_id = not hass scene, use original code
+            if "entity_id" not in scene_conf:
+                result[scene_id] = self.__async_scene_to_hue(scene_conf)
+
+        ## Scenes from hass
+        for entity in self.hue.hass.entity_registry.values():
+            if not entity["entity_id"].startswith("scene."):
+                # only interested in scenes here
+                continue
+            if entity["disabled_by"]:
+                # do not include disabled scenes
+                continue
+            entity_id = entity["entity_id"]
+            scene_id = await self.config.async_entity_id_to_scene_id(entity_id)
+            # The scene may have only just been created by above method
+            scene_conf = await self.config.async_get_storage_value("scenes", scene_id) 
+            result[scene_id] = await self.__async_scene_to_hue(scene_conf)
+
+        return result
+
+
     async def __async_create_local_item(
         self, data: Any, itemtype: str = "scenes"
     ) -> str:
@@ -996,13 +1058,8 @@ class HueApi:
                         # set state of first light as group state
                         entity_obj = await self.__async_entity_to_hue(entity)
                         result[group_id]["action"] = entity_obj["state"]
-            result[group_id]["state"]["any_on"] = lights_on > 0
-            result[group_id]["state"]["all_on"] = lights_on == len(
-                result[group_id]["lights"]
-            )
-            # do not return empty areas/rooms
-            if len(result[group_id]["lights"]) == 0:
-                result.pop(group_id, None)
+            result[group_id]["state"]["any_on"] = True if lights_on > 0 else False
+            result[group_id]["state"]["all_on"] = True if lights_on == len(result[group_id]["lights"]) else False
 
         return result
 
