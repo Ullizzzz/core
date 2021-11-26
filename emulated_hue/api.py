@@ -1039,7 +1039,9 @@ class HueApi:
             LOGGER.info(area)
             area_id = area["area_id"]
             group_id = await self.config.async_area_id_to_group_id(area_id)
+            LOGGER.info(group_id)
             group_conf = await self.config.async_get_group_config(group_id)
+            LOGGER.info(group_conf)
             if not group_conf["enabled"]:
                 continue
             result[group_id] = group_conf.copy()
