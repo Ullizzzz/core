@@ -751,8 +751,8 @@ class HueApi:
             retval.pop("lightstates", None)
             scenes_group = retval["group"]
             retval["lights"] = await self.__async_get_group_id(scenes_group)
-        LOGGER.info(retval)
-        LOGGER.info("retval")
+        #LOGGER.info(retval)
+        #LOGGER.info("retval")
         return retval
 
     async def __async_entity_to_hue(
@@ -977,8 +977,8 @@ class HueApi:
 
         # local scenes first
         scenes = await self.config.async_get_storage_value("scenes", default={})
-        LOGGER.info("local scenes")
-        LOGGER.info(scenes)
+        #LOGGER.info("local scenes")
+        #LOGGER.info(scenes)
         #result = copy.deepcopy(scenes)
         for scene_id, scene_conf in scenes.items():
             # no entity_id = not hass scene, use original code
@@ -993,18 +993,18 @@ class HueApi:
             if entity["disabled_by"]:
                 # do not include disabled scenes
                 continue
-            LOGGER.info("Hassio scenes")
-            LOGGER.info(entity)
+            #LOGGER.info("Hassio scenes")
+            #LOGGER.info(entity)
             entity_id = entity["entity_id"]
-            LOGGER.info("entity_id")
-            LOGGER.info(entity_id)
+            #LOGGER.info("entity_id")
+            #LOGGER.info(entity_id)
             scene_id = await self.config.async_entity_id_to_scene_id(entity_id)
-            LOGGER.info("scene_id")
-            LOGGER.info(scene_id)
+            #LOGGER.info("scene_id")
+            #LOGGER.info(scene_id)
             # The scene may have only just been created by above method
             scene_conf = await self.config.async_get_storage_value("scenes", scene_id) 
-            LOGGER.info("scene_conf")
-            LOGGER.info(scene_conf)
+            #LOGGER.info("scene_conf")
+            #LOGGER.info(scene_conf)
             result[scene_id] = await self.__async_scene_to_hue(scene_conf)
 
         return result
@@ -1048,12 +1048,12 @@ class HueApi:
 
         # Hass areas/rooms
         for area in self.hue.hass.area_registry.values():
-            LOGGER.info("area")
-            LOGGER.info(area)
+            #LOGGER.info("area")
+            #LOGGER.info(area)
             area_id = area["area_id"]
             group_id = await self.config.async_area_id_to_group_id(area_id)
-            LOGGER.info("roup_id area")
-            LOGGER.info(group_id)
+            #LOGGER.info("roup_id area")
+            #LOGGER.info(group_id)
             group_conf = await self.config.async_get_group_config(group_id)
             #LOGGER.info(group_conf)
             if not group_conf["enabled"]:
