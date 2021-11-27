@@ -994,9 +994,15 @@ class HueApi:
             LOGGER.info("Hassio scenes")
             LOGGER.info(entity)
             entity_id = entity["entity_id"]
+            LOGGER.info("entity_id")
+            LOGGER.info(entity_id)
             scene_id = await self.config.async_entity_id_to_scene_id(entity_id)
+            LOGGER.info("scene_id")
+            LOGGER.info(scene_id)
             # The scene may have only just been created by above method
             scene_conf = await self.config.async_get_storage_value("scenes", scene_id) 
+            LOGGER.info("scene_conf")
+            LOGGER.info(scene_conf)
             result[scene_id] = await self.__async_scene_to_hue(scene_conf)
 
         return result
