@@ -745,12 +745,14 @@ class HueApi:
                 group_id = await self.config.async_area_id_to_group_id(area_id)
             else:
                 group_id = 0
-            retval["group"] = group_id+2
+            retval["group"] = group_id
         else:
             # This is a regular scene. Use original code
             retval.pop("lightstates", None)
             scenes_group = retval["group"]
             retval["lights"] = await self.__async_get_group_id(scenes_group)
+        LOGGER.info(retval)
+        LOGGER.info("retval")
         return retval
 
     async def __async_entity_to_hue(
