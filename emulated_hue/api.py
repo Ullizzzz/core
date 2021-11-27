@@ -745,7 +745,7 @@ class HueApi:
                 group_id = await self.config.async_area_id_to_group_id(area_id)
             else:
                 group_id = 0
-            retval["group"] = group_id
+            retval["group"] = group_id+2
         else:
             # This is a regular scene. Use original code
             retval.pop("lightstates", None)
