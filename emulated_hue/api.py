@@ -1106,8 +1106,9 @@ class HueApi:
                     # do not include disabled devices
                     continue
                 if not entity["entity_id"].startswith("light.") and entity["entity_id"].startswith("sensor."):
-                    LOGGER.info("entity")
-                    LOGGER.info(entity)
+                    LOGGER.info("device registered?")
+                    device = self.hue.hass.device_registry.get(entity["device_id"])
+                    LOGGER.info(device)
                     # for now only include lights
                     # TODO: include switches, sensors ?
                     continue
