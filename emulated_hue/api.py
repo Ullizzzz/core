@@ -1048,8 +1048,8 @@ class HueApi:
 
         # Hass areas/rooms
         for area in self.hue.hass.area_registry.values():
-            LOGGER.info("area")
-            LOGGER.info(area)
+            #LOGGER.info("area")
+            #LOGGER.info(area)
             area_id = area["area_id"]
             group_id = await self.config.async_area_id_to_group_id(area_id)
             #LOGGER.info("roup_id area")
@@ -1106,6 +1106,8 @@ class HueApi:
                     # do not include disabled devices
                     continue
                 if not entity["entity_id"].startswith("light."):
+                    LOGGER.info("entity")
+                    LOGGER.info(entity)
                     # for now only include lights
                     # TODO: include switches, sensors ?
                     continue
