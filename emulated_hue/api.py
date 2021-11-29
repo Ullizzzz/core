@@ -1108,7 +1108,8 @@ class HueApi:
                 if not entity["entity_id"].startswith("light.") and entity["entity_id"].startswith("sensor."):
                     LOGGER.info("device registered?")
                     device = self.hue.hass.device_registry.get(entity["device_id"])
-                    LOGGER.info(device)
+                    if device["area_id"]:
+                        LOGGER.info(device)
                     # for now only include lights
                     # TODO: include switches, sensors ?
                     continue
