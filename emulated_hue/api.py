@@ -993,8 +993,8 @@ class HueApi:
             if entity["disabled_by"]:
                 # do not include disabled scenes
                 continue
-            #LOGGER.info("Hassio scenes")
-            #LOGGER.info(entity)
+            LOGGER.info("Hassio scenes")
+            LOGGER.info(entity)
             entity_id = entity["entity_id"]
             #LOGGER.info("entity_id")
             #LOGGER.info(entity_id)
@@ -1113,14 +1113,14 @@ class HueApi:
                     # for now only include lights
                     # TODO: include switches, sensors ?
                     continue
-                if not entity["entity_id"].startswith("sensor."):
+                #if not entity["entity_id"].startswith("sensor."):
                     #LOGGER.info("device registered?")
                     #device = self.hue.hass.device_registry.get(entity["device_id"])
                     #if device["area_id"]:
                         #LOGGER.info(device)
                     # for now only include lights
                     # TODO: include switches, sensors ?
-                    continue
+                    #continue
                 device = self.hue.hass.device_registry.get(entity["device_id"])
                 LOGGER.info(device)
                 # first check if area is defined on entity itself
