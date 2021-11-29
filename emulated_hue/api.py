@@ -998,8 +998,8 @@ class HueApi:
                 continue
             if entity["area_id"] != None and entity["entity_id"].startswith("sensor."):
                 state = (self.hue.hass.get_state(entity["entity_id"], attribute=None)["state"])
-                entity["entity_id"]
-                entity["name"] = state
+                #entity["entity_id"]
+                #entity["name"] = state
             #LOGGER.info("Hassio scenes")
             #LOGGER.info(entity)
             entity_id = entity["entity_id"]
@@ -1009,6 +1009,7 @@ class HueApi:
             #LOGGER.info("scene_conf")
             #LOGGER.info(scene_conf)
             result[scene_id] = await self.__async_scene_to_hue(scene_conf)
+            LOGGER.info(result)
 
         return result
 
