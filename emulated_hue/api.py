@@ -1122,6 +1122,7 @@ class HueApi:
                     # TODO: include switches, sensors ?
                     continue
                 device = self.hue.hass.device_registry.get(entity["device_id"])
+                LOGGER.info(device)
                 # first check if area is defined on entity itself
                 if entity["area_id"] and entity["area_id"] != group_conf["area_id"]:
                     # different area id defined on entity so skip this entity
