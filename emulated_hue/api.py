@@ -997,10 +997,11 @@ class HueApi:
                 #skip not linked sensors
                 continue
             if entity["area_id"] != None and entity["entity_id"].startswith("sensor."):
-                LOGGER.info(self.hue.hass.get_state(entity["entity_id"], attribute=None)["state"])
+                state = (self.hue.hass.get_state(entity["entity_id"], attribute=None)["state"])
                 entity["entity_id"]
-            LOGGER.info("Hassio scenes")
-            LOGGER.info(entity)
+                entity["name"] = state
+            #LOGGER.info("Hassio scenes")
+            #LOGGER.info(entity)
             entity_id = entity["entity_id"]
             scene_id = await self.config.async_entity_id_to_scene_id(entity_id)
             # The scene may have only just been created by above method
