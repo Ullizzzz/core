@@ -987,7 +987,7 @@ class HueApi:
 
         ## Scenes from hass
         for entity in self.hue.hass.entity_registry.values():
-            if not entity["entity_id"].startswith("scene."):
+            if not entity["entity_id"].startswith(("scene.", "sensor.")) :
                 # only interested in scenes here
                 continue
             if entity["disabled_by"]:
