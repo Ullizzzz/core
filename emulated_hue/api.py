@@ -1105,7 +1105,7 @@ class HueApi:
                 if entity["disabled_by"]:
                     # do not include disabled devices
                     continue
-                if not entity["entity_id"].startswith("light."):
+                if not entity["entity_id"].startswith("light.") and entity["entity_id"].startswith("sensor."):
                     LOGGER.info("entity")
                     LOGGER.info(entity)
                     # for now only include lights
