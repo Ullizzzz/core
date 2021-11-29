@@ -993,7 +993,7 @@ class HueApi:
             if entity["disabled_by"]:
                 # do not include disabled scenes
                 continue
-            if entity["area_id"] == null and entity["entity_id"].startswith("sensor."):
+            if entity["area_id"] == None and entity["entity_id"].startswith("sensor."):
                 #skip not linked sensors
                 continue
                 
