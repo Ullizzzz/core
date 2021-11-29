@@ -997,7 +997,7 @@ class HueApi:
                 #skip not linked sensors
                 continue
             if entity["area_id"] != None and entity["entity_id"].startswith("sensor."):
-                LOGGER.info(self.hue.hass.get_state(entity["entity_id"], attribute=state))
+                LOGGER.info(self.hue.hass.get_state(entity["entity_id"], attribute="state"))
                 entity["entity_id"]
             LOGGER.info("Hassio scenes")
             LOGGER.info(entity)
