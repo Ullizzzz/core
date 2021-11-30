@@ -744,7 +744,7 @@ class HueApi:
             if "friendly_name" in scene_attr:
                 retval["name"] = scene_attr["friendly_name"]
             elif entity_id.startswith("sensor."):
-                retval["name"] = scene_attr["friendly_name"]
+                retval["name"] = scene_state["state"]
             else:
                 retval["name"] = entity_id
             if "area_id" in scene_entity:
