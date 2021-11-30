@@ -731,7 +731,8 @@ class HueApi:
         if "entity_id" in retval:
             # This is a hass scene
             entity_id = retval["entity_id"]
-            #LOGGER.info(entity_id)
+            LOGGER.info("entity_id")
+            LOGGER.info(entity_id)
             scene_entity = self.hue.hass.entity_registry.get(entity_id)
             if not scene_entity:
                 raise Exception(f"Entity {entity_id} not found!")
@@ -741,7 +742,7 @@ class HueApi:
             scene_attr = scene_state["attributes"]
             LOGGER.info("scene_attr")
             LOGGER.info(scene_attr)
-            if "friendly_name" in scene_attr:
+            if "friendly_name" in scene_attr and not entity_id.startswith("sensor."):
                 retval["name"] = scene_attr["friendly_name"]
             elif entity_id.startswith("sensor."):
                 retval["name"] = scene_state["state"]
