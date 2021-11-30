@@ -731,6 +731,7 @@ class HueApi:
         if "entity_id" in retval:
             # This is a hass scene
             entity_id = retval["entity_id"]
+            LOGGER.info(entity_id)
             scene_entity = self.hue.hass.entity_registry.get(entity_id)
             if not scene_entity:
                 raise Exception(f"Entity {entity_id} not found!")
@@ -1006,7 +1007,7 @@ class HueApi:
             scene_id = await self.config.async_entity_id_to_scene_id(entity_id)
             # The scene may have only just been created by above method
             scene_conf = await self.config.async_get_storage_value("scenes", scene_id) 
-            LOGGER.info(scene_conf)
+            #LOGGER.info(scene_conf)
             #LOGGER.info("scene_conf")
             #LOGGER.info(scene_conf)
             result[scene_id] = await self.__async_scene_to_hue(scene_conf)
