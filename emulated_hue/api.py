@@ -731,17 +731,11 @@ class HueApi:
         if "entity_id" in retval:
             # This is a hass scene
             entity_id = retval["entity_id"]
-            LOGGER.info("entity_id")
-            LOGGER.info(entity_id)
             scene_entity = self.hue.hass.entity_registry.get(entity_id)
             if not scene_entity:
                 raise Exception(f"Entity {entity_id} not found!")
             scene_state = self.hue.hass.get_state(entity_id, attribute=None)
-            LOGGER.info("scene_state")
-            LOGGER.info(scene_state)
             scene_attr = scene_state["attributes"]
-            LOGGER.info("scene_attr")
-            LOGGER.info(scene_attr)
             if "friendly_name" in scene_attr and not entity_id.startswith("sensor."):
                 retval["name"] = scene_attr["friendly_name"]
             elif entity_id.startswith("sensor."):
@@ -759,8 +753,6 @@ class HueApi:
             retval.pop("lightstates", None)
             scenes_group = retval["group"]
             retval["lights"] = await self.__async_get_group_id(scenes_group)
-        #LOGGER.info(retval)
-        #LOGGER.info("retval")
         return retval
 
     async def __async_entity_to_hue(
@@ -985,8 +977,6 @@ class HueApi:
 
         # local scenes first
         scenes = await self.config.async_get_storage_value("scenes", default={})
-        #LOGGER.info("local scenes")
-        #LOGGER.info(scenes)
         #result = copy.deepcopy(scenes)
         for scene_id, scene_conf in scenes.items():
             # no entity_id = not hass scene, use original code
@@ -1006,20 +996,11 @@ class HueApi:
                 continue
             if entity["area_id"] != None and entity["entity_id"].startswith("sensor."):
                 state = (self.hue.hass.get_state(entity["entity_id"], attribute=None)["state"])
-                #entity["entity_id"]
-                #entity["name"] = state
-            #LOGGER.info("Hassio scenes")
-            #LOGGER.info(entity)
             entity_id = entity["entity_id"]
             scene_id = await self.config.async_entity_id_to_scene_id(entity_id)
             # The scene may have only just been created by above method
             scene_conf = await self.config.async_get_storage_value("scenes", scene_id) 
-            #LOGGER.info(scene_conf)
-            #LOGGER.info("scene_conf")
-            #LOGGER.info(scene_conf)
             result[scene_id] = await self.__async_scene_to_hue(scene_conf)
-            #LOGGER.info(result)
-
         return result
 
 
@@ -1061,14 +1042,9 @@ class HueApi:
 
         # Hass areas/rooms
         for area in self.hue.hass.area_registry.values():
-            #LOGGER.info("area")
-            #LOGGER.info(area)
             area_id = area["area_id"]
             group_id = await self.config.async_area_id_to_group_id(area_id)
-            #LOGGER.info("roup_id area")
-            #LOGGER.info(group_id)
             group_conf = await self.config.async_get_group_config(group_id)
-            #LOGGER.info(group_conf)
             if not group_conf["enabled"]:
                 continue
             result[group_id] = group_conf.copy()
